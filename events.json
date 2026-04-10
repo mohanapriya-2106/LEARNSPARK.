@@ -1,0 +1,110 @@
+{
+  "meta": {
+    "version": "2.0",
+    "app": "LearnSpark",
+    "description": "Central data file — courses, quizzes, preset tasks, built-in students, achievements"
+  },
+
+  "students": [
+    { "name": "ANU",     "emoji": "🌟", "color": "linear-gradient(135deg,#f6ad55,#f687b3)", "defaultPin": "1111" },
+    { "name": "ANAMIKA", "emoji": "💎", "color": "linear-gradient(135deg,#b794f4,#63b3ed)", "defaultPin": "2222" },
+    { "name": "ADHI",    "emoji": "⚡", "color": "linear-gradient(135deg,#63b3ed,#68d391)", "defaultPin": "3333" },
+    { "name": "KRISHNA", "emoji": "🔥", "color": "linear-gradient(135deg,#fc8181,#f6ad55)", "defaultPin": "4444" },
+    { "name": "VARUN",   "emoji": "🚀", "color": "linear-gradient(135deg,#68d391,#b794f4)", "defaultPin": "5555" }
+  ],
+
+  "courses": [
+    {
+      "id": "html",
+      "title": "HTML Fundamentals",
+      "tag": "Foundation",
+      "emoji": "🌐",
+      "color": "linear-gradient(135deg,#f6ad55,#fc8181)",
+      "accent": "#f6ad55",
+      "desc": "Master the structure of the web with HTML5.",
+      "duration": "45 min",
+      "level": "Beginner",
+      "videoId": "qz0aGYrrlhU",
+      "topics": ["HTML Structure", "Tags & Elements", "Forms & Inputs", "Semantic HTML", "Links & Images"]
+    },
+    {
+      "id": "css",
+      "title": "CSS Styling & Design",
+      "tag": "Styling",
+      "emoji": "🎨",
+      "color": "linear-gradient(135deg,#63b3ed,#b794f4)",
+      "accent": "#63b3ed",
+      "desc": "Transform plain HTML into beautiful interfaces with CSS3.",
+      "duration": "60 min",
+      "level": "Beginner",
+      "videoId": "yfoY53QXEnI",
+      "topics": ["Selectors & Properties", "Box Model", "Flexbox", "CSS Grid", "Animations"]
+    },
+    {
+      "id": "js",
+      "title": "JavaScript Programming",
+      "tag": "Logic",
+      "emoji": "⚡",
+      "color": "linear-gradient(135deg,#68d391,#63b3ed)",
+      "accent": "#68d391",
+      "desc": "Bring your pages to life with JavaScript.",
+      "duration": "75 min",
+      "level": "Intermediate",
+      "videoId": "hdI2bqOjy3c",
+      "topics": ["Variables & Types", "Functions", "Arrays & Objects", "DOM Manipulation", "Events & APIs"]
+    }
+  ],
+
+  "quizzes": {
+    "html": [
+      { "q": "What does HTML stand for?",                         "options": ["Hyper Text Markup Language","High Text Machine Language","Hyper Transfer Markup Language","Home Tool Markup Language"], "ans": 0 },
+      { "q": "Which tag is used for the largest heading?",        "options": ["<h6>","<heading>","<h1>","<head>"],                                                                                    "ans": 2 },
+      { "q": "Which HTML element defines the title of a document?","options": ["<meta>","<title>","<head>","<header>"],                                                                               "ans": 1 },
+      { "q": "What is the correct HTML element for a line break?","options": ["<lb>","<break>","<br>","<newline>"],                                                                                   "ans": 2 },
+      { "q": "Which attribute specifies alternate text for an image?","options": ["src","title","alt","href"],                                                                                        "ans": 2 }
+    ],
+    "css": [
+      { "q": "What does CSS stand for?",                          "options": ["Cascading Style Sheets","Creative Style System","Computer Style Sheets","Colorful Style Sheets"],                     "ans": 0 },
+      { "q": "Which property changes background color?",          "options": ["color","bg-color","background-color","bgcolor"],                                                                       "ans": 2 },
+      { "q": "How do you select an element with id=\"demo\"?",    "options": [".demo","#demo","*demo","demo"],                                                                                       "ans": 1 },
+      { "q": "Which property is used to change font size?",       "options": ["text-size","font-style","font-size","text-font"],                                                                     "ans": 2 },
+      { "q": "How do you make text bold in CSS?",                 "options": ["font-weight: bold","font: bold","text-weight: bold","style: bold"],                                                   "ans": 0 }
+    ],
+    "js": [
+      { "q": "Which keyword declares a variable in JavaScript?",  "options": ["int","var","string","dim"],                                                                                           "ans": 1 },
+      { "q": "How do you show \"Hello World\" in an alert box?",  "options": ["alertBox(\"Hello World\")","msg(\"Hello World\")","alert(\"Hello World\")","msgBox(\"Hello World\")"],               "ans": 2 },
+      { "q": "How do you create a function in JavaScript?",       "options": ["function = myFunc()","function myFunc()","create function myFunc()","def myFunc()"],                                 "ans": 1 },
+      { "q": "How do you write a single-line comment in JavaScript?","options": ["<!-- comment -->","** comment **","// comment","## comment"],                                                      "ans": 2 },
+      { "q": "Which method adds an element at the end of an array?","options": ["push()","add()","append()","insert()"],                                                                             "ans": 0 }
+    ]
+  },
+
+  "presetTasks": [
+    { "title": "🌐 Learn HTML Course",                   "category": "📖 Study",    "icon": "🌐", "tic": "tic-course",   "courseId": "html" },
+    { "title": "🎨 Learn CSS Course",                    "category": "📖 Study",    "icon": "🎨", "tic": "tic-course",   "courseId": "css"  },
+    { "title": "⚡ Learn JavaScript Course",             "category": "📖 Study",    "icon": "⚡", "tic": "tic-course",   "courseId": "js"   },
+    { "title": "🎯 Complete Quiz",                       "category": "📖 Study",    "icon": "🎯", "tic": "tic-study",    "courseId": null   },
+    { "title": "📝 Make Notes of Learning",              "category": "🌱 Personal", "icon": "📝", "tic": "tic-personal", "courseId": null   },
+    { "title": "🚀 Make New Student-Friendly Project",   "category": "💼 Work",     "icon": "🚀", "tic": "tic-work",     "courseId": null   }
+  ],
+
+  "achievements": [
+    { "id": "first_login",  "icon": "🚀", "name": "Launchpad",     "desc": "Logged in for the first time"               },
+    { "id": "first_video",  "icon": "📺", "name": "First Watch",   "desc": "Watched your first lesson"                  },
+    { "id": "first_quiz",   "icon": "🎯", "name": "Quiz Rookie",   "desc": "Completed your first quiz"                  },
+    { "id": "first_cert",   "icon": "🏆", "name": "Graduate",      "desc": "Earned your first certificate"              },
+    { "id": "all_videos",   "icon": "🎬", "name": "Binge Watcher", "desc": "Watched all course videos"                  },
+    { "id": "all_courses",  "icon": "🌟", "name": "Web Master",    "desc": "Completed all 3 courses"                    },
+    { "id": "perfect",      "icon": "💯", "name": "Perfectionist", "desc": "Scored 100% on any quiz"                    },
+    { "id": "task_5",       "icon": "✅", "name": "Task Star",     "desc": "Complete 5+ personal activities"            },
+    { "id": "task_all",     "icon": "🎉", "name": "Task Master",   "desc": "Complete ALL 6 preset tasks"                },
+    { "id": "on_fire",      "icon": "🔥", "name": "On Fire!",      "desc": "Complete 3+ activities"                     }
+  ],
+
+  "aiFeedback": {
+    "100": ["Outstanding! Perfect score. 🏆 Exceptional understanding of all concepts."],
+    "80":  ["Excellent work! Strong grasp of fundamentals. A little more practice will make you unstoppable!"],
+    "60":  ["Good effort! You have the foundation — review the material and try again!"],
+    "0":   ["Keep going! Every expert was once a beginner. Review the videos and come back stronger!"]
+  }
+}

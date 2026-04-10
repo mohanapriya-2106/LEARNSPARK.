@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LearnSpark — Student Learning Portal</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Space+Mono&display=swap" rel="stylesheet"/>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css"/>
+
+  <!-- jsPDF for certificate download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Animated star background -->
+<canvas id="bg"></canvas>
+
+<!-- Fireworks canvas (shown on 100% quiz score) -->
+<canvas id="fireworks-canvas"></canvas>
+
+<!-- Toast notification -->
+<div id="toast" class="toast"></div>
+
+<!-- ══════════════════════════════════════
+     EDIT PROFILE MODAL
+══════════════════════════════════════ -->
+<div id="modal-edit" class="modal-ov">
+  <div class="modal-box">
+    <button class="modal-x" onclick="closeModal('modal-edit')">✕</button>
+    <div class="modal-title">✏️ EDIT PROFILE</div>
+    <div class="inp-grp">
+      <label class="inp-lbl">Display Name</label>
+      <input id="edit-name" class="inp-field" maxlength="20" placeholder="Your name"/>
+    </div>
+    <div class="inp-grp">
+      <label class="inp-lbl">Bio</label>
+      <input id="edit-bio" class="inp-field" maxlength="80" placeholder="A short bio..."/>
+    </div>
+    <div class="inp-grp">
+      <label class="inp-lbl">Avatar Emoji</label>
+      <div class="emoji-pick" id="emoji-pick"></div>
+    </div>
+    <div style="display:flex;gap:.8rem;margin-top:1.5rem;">
+      <button class="btn btn-primary" onclick="saveEditProfile()" style="flex:1;">💾 Save</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-edit')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CHANGE PIN MODAL
+══════════════════════════════════════ -->
+<div id="modal-pin" class="modal-ov">
+  <div class="modal-box" style="max-width:340px;text-align:center;">
+    <button class="modal-x" onclick="closeModal('modal-pin')">✕</button>
+    <div class="modal-title">🔐 SET NEW PIN</div>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1rem;">Enter a new 4-digit PIN</p>
+    <div class="pin-dots" id="npd-dots">
+      <div class="pin-dot" id="npd0"></div>
+      <div class="pin-dot" id="npd1"></div>
+      <div class="pin-dot" id="npd2"></div>
+      <div class="pin-dot" id="npd3"></div>
+    </div>
+    <div class="pin-pad" id="new-pin-pad" style="margin:0 auto;"></div>
+    <div id="new-pin-err" class="pin-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: LOGIN
+══════════════════════════════════════ -->
+<div id="page-login" class="page active" style="display:flex;">
+  <div style="min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:2rem;">
+    <div class="login-box glass fade-up" style="max-width:540px;">
+      <div class="login-logo">⚡ LearnSpark</div>
+      <p class="login-sub">Your Gateway to Web Mastery</p>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:1.2rem 0;"></div>
+
+      <!-- Tabs: Login / Register -->
+      <div class="login-tabs">
+        <button class="login-tab active" id="tab-login">🔑 Login</button>
+        <button class="login-tab" id="tab-register">✨ New Student</button>
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div class="login-panel active" id="panel-login">
+        <span class="login-label">👤 Select Your Profile</span>
+        <div class="student-grid" id="student-grid"></div>
+
+        <div id="pin-section" class="pin-section" style="display:none;">
+          <div class="pin-title">🔐 Enter Your PIN</div>
+          <div id="pin-hint-txt" class="pin-hint-text"></div>
+          <div class="pin-dots">
+            <div class="pin-dot" id="pd0"></div>
+            <div class="pin-dot" id="pd1"></div>
+            <div class="pin-dot" id="pd2"></div>
+            <div class="pin-dot" id="pd3"></div>
+          </div>
+          <div class="pin-pad" id="pin-pad"></div>
+          <div id="pin-err" class="pin-error"></div>
+        </div>
+      </div>
+
+      <!-- ── REGISTER PANEL ── -->
+      <div class="login-panel" id="panel-register">
+        <div class="reg-stepper">
+          <div class="reg-step-dot active" id="rdot0"></div>
+          <div class="reg-step-dot" id="rdot1"></div>
+          <div class="reg-step-dot" id="rdot2"></div>
+        </div>
+
+        <!-- Step 1: Name + Emoji -->
+        <div class="reg-step active" id="reg-step-1">
+          <div class="reg-step-label">Step 1 of 3 · Your Identity</div>
+          <div style="margin-bottom:1rem;">
+            <input id="reg-name" class="reg-inp" maxlength="20" placeholder="Enter your name…"
+                   autocomplete="off" oninput="this.value=this.value.toUpperCase()"/>
+            <div id="reg-name-err" style="color:var(--red);font-size:.8rem;margin-top:.4rem;min-height:1rem;"></div>
+          </div>
+          <div class="reg-step-label">Choose Your Avatar</div>
+          <div class="reg-emoji-grid" id="reg-emoji-grid"></div>
+          <button class="btn btn-primary" id="reg-next-btn" style="width:100%;margin-top:.5rem;">Next →</button>
+        </div>
+
+        <!-- Step 2: Set PIN -->
+        <div class="reg-step" id="reg-step-2">
+          <div class="reg-step-label">Step 2 of 3 · Set Your PIN</div>
+          <div style="font-size:.88rem;color:var(--muted);margin-bottom:.8rem;">Choose a 4-digit PIN to protect your account</div>
+          <div class="pin-dots" style="margin-bottom:.8rem;">
+            <div class="pin-dot" id="rpd0"></div><div class="pin-dot" id="rpd1"></div>
+            <div class="pin-dot" id="rpd2"></div><div class="pin-dot" id="rpd3"></div>
+          </div>
+          <div class="pin-pad" id="reg-pin-pad" style="margin:0 auto .8rem;"></div>
+          <button class="back-btn" id="reg-back-2" style="margin:0 auto;display:flex;">← Back</button>
+        </div>
+
+        <!-- Step 3: Confirm PIN -->
+        <div class="reg-step" id="reg-step-3">
+          <div class="reg-step-label">Step 3 of 3 · Confirm Your PIN</div>
+          <div style="font-size:.88rem;color:var(--muted);margin-bottom:.8rem;">Re-enter your PIN to confirm</div>
+          <div class="pin-dots" style="margin-bottom:.8rem;">
+            <div class="pin-dot" id="rcp0"></div><div class="pin-dot" id="rcp1"></div>
+            <div class="pin-dot" id="rcp2"></div><div class="pin-dot" id="rcp3"></div>
+          </div>
+          <div class="pin-pad" id="reg-confirm-pad" style="margin:0 auto .8rem;"></div>
+          <div id="reg-pin-err" class="pin-error" style="text-align:center;"></div>
+          <button class="back-btn" id="reg-back-3" style="margin:.5rem auto 0;display:flex;">← Back</button>
+        </div>
+      </div>
+
+      <p style="margin-top:1rem;font-size:.78rem;color:var(--muted);">🔒 PIN secured · Progress saved · Earn certificates</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE: PROFILE
+══════════════════════════════════════ -->
+<div id="page-profile" class="page">
+  <nav>
+    <div class="nav-logo">⚡ LearnSpark</div>
+    <div style="display:flex;align-items:center;gap:.8rem;">
+      <button class="btn btn-primary" onclick="goToCourses()" style="padding:.45rem 1.2rem;font-size:.9rem;">📚 Start Learning →</button>
+      <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+      <button class="nav-btn" onclick="logout()" style="color:var(--red);border-color:rgba(252,129,129,0.3);">↩ Logout</button>
+    </div>
+  </nav>
+
+  <div class="profile-hero-bg">
+    <div class="profile-hero-inner">
+      <div class="profile-avatar-wrap">
+        <div class="profile-big-avatar" id="prof-avatar"></div>
+        <div class="edit-avatar-btn" onclick="openEditModal()" title="Edit profile">✏️</div>
+      </div>
+      <div class="profile-info-wrap">
+        <div class="profile-display-name" id="prof-name">STUDENT</div>
+        <div class="profile-username"     id="prof-username">@student · LearnSpark</div>
+        <div class="profile-bio-text"     id="prof-bio">Aspiring Web Developer</div>
+        <div class="profile-chips"        id="prof-chips"></div>
+      </div>
+    </div>
+
+    <div class="profile-tabs-bar">
+      <button class="p-tab active" onclick="switchPTab('overview',this)">📊 Overview</button>
+      <button class="p-tab" onclick="switchPTab('courses',this)">📚 Courses</button>
+      <button class="p-tab" onclick="switchPTab('tasks',this)">✅ My Tasks</button>
+      <button class="p-tab" onclick="switchPTab('achievements',this)">🏅 Achievements</button>
+      <button class="p-tab" onclick="switchPTab('settings',this)">⚙️ Settings</button>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <!-- Overview tab -->
+    <div id="ptab-overview" class="ptab active">
+      <div class="stat-cards" id="prof-stats"></div>
+      <div class="section-title">📈 Course Progress</div>
+      <div id="prof-progress"></div>
+    </div>
+
+    <!-- Courses tab -->
+    <div id="ptab-courses" class="ptab">
+      <div class="section-title">📚 All Courses</div>
+      <div id="prof-all-courses"></div>
+    </div>
+
+    <!-- Tasks tab -->
+    <div id="ptab-tasks" class="ptab">
+      <div class="section-title">✅ My Activity Tasks</div>
+      <div id="prof-tasks-summary"></div>
+    </div>
+
+    <!-- Achievements tab -->
+    <div id="ptab-achievements" class="ptab">
+      <div class="section-title">🏅 Achievements</div>
+      <div class="ach-grid" id="ach-grid"></div>
+    </div>
+
+    <!-- Settings tab -->
+    <div id="ptab-settings" class="ptab">
+      <div class="section-title">⚙️ Settings</div>
+      <div class="settings-block">
+        <div class="settings-block-title">🔐 Security</div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-lbl">Change PIN</div>
+            <div class="settings-sub">Update your 4-digit login PIN</div>
+          </div>
+          <button class="btn btn-outline" onclick="openModal('modal-pin');buildNewPinPad()" style="padding:.4rem .9rem;font-size:.85rem;">Change</button>
+        </div>
+      </div>
+      <div class="settings-block">
+        <div class="settings-block-title">🎨 Appearance</div>
+        <div class="settings-row">
+          <div><div class="settings-lbl">Dark Mode</div><div class="settings-sub">Toggle dark/light theme</div></div>
+          <label class="toggle-sw"><input type="checkbox" id="dark-sw" onchange="toggleDark()"/><span class="toggle-sl"></span></label>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-lbl">Celebration Fireworks</div><div class="settings-sub">Celebrate perfect scores with fireworks</div></div>
+          <label class="toggle-sw"><input type="checkbox" id="fw-sw" checked/><span class="toggle-sl"></span></label>
+        </div>
+      </div>
+      <div class="settings-block">
+        <div class="settings-block-title">⚠️ Danger Zone</div>
+        <div class="settings-row">
+          <div><div class="settings-lbl">Reset My Progress</div><div class="settings-sub">Clears all quiz scores, videos &amp; activities</div></div>
+          <button class="btn btn-danger" onclick="doReset()" style="padding:.4rem .9rem;font-size:.85rem;">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-profile -->
+
+<!-- ══════════════════════════════════════
+     PAGE: MAIN APP
+══════════════════════════════════════ -->
+<div id="page-app" class="page" style="display:none;">
+  <nav>
+    <div class="nav-logo">⚡ LearnSpark</div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+      <button class="nav-btn" onclick="showSection('tasks')">✅ My Tasks</button>
+      <button class="nav-btn" onclick="showSection('activity')">📊 Activity</button>
+      <button class="nav-btn" onclick="showSection('leaderboard')">🏆 Leaderboard</button>
+      <button class="nav-btn" onclick="showSection('calendar')">📅 Calendar</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:.8rem;">
+      <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+      <div class="nav-user">
+        <div class="avatar" id="nav-avatar" onclick="goToProfile()" title="My Profile">?</div>
+        <span id="nav-name">Student</span>
+      </div>
+      <button class="nav-btn" onclick="goToProfile()" style="color:var(--purple);border-color:rgba(183,148,244,0.3);">👤 Profile</button>
+      <button class="nav-btn" onclick="logout()" style="color:var(--red);border-color:rgba(252,129,129,0.3);">↩ Logout</button>
+    </div>
+  </nav>
+
+  <!-- HOME SECTION -->
+  <div id="section-home" class="section-content">
+    <div class="home-hero">
+      <div style="font-size:.9rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem;">Welcome back,</div>
+      <h1 class="hero-title">⚡ LEARNSPARK</h1>
+      <p class="hero-sub" id="hero-sub-text">Start your journey</p>
+      <div class="hero-stats" id="hero-stats"></div>
+    </div>
+    <div style="padding:0 2rem 1rem;"><div class="section-title">📚 Your Courses</div></div>
+    <div class="courses-grid" id="courses-grid"></div>
+  </div>
+
+  <!-- TASKS SECTION -->
+  <div id="section-tasks" class="section-content" style="display:none;">
+    <div class="tasks-wrap">
+
+      <div class="tasks-header">
+        <div>
+          <div class="section-title" style="margin-bottom:.3rem;">✅ My Activity Tracker</div>
+          <div class="tasks-live-count" id="tasks-live-count">Loading…</div>
+        </div>
+        <div class="task-filter-row">
+          <button class="task-filter-btn active" onclick="setTaskFilter('all',this)">All</button>
+          <button class="task-filter-btn" onclick="setTaskFilter('pending',this)">⏳ Pending</button>
+          <button class="task-filter-btn" onclick="setTaskFilter('done',this)">✅ Done</button>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="tasks-pbar-wrap glass">
+        <div class="tasks-pbar-meta">
+          <span id="tpbar-done-label">0 completed</span>
+          <span id="tpbar-pct-label">0%</span>
+        </div>
+        <div class="tasks-pbar-track"><div class="tasks-pbar-fill" id="tpbar-fill"></div></div>
+      </div>
+
+      <!-- Add new task -->
+      <div class="add-task-card glass2">
+        <div class="add-task-title">➕ Add New Activity</div>
+        <div class="add-task-form">
+          <input id="new-task-input" class="task-input"
+                 placeholder="What will you accomplish today?"
+                 maxlength="100"/>
+          <div class="task-cat-row">
+            <span class="task-cat-lbl">Category:</span>
+            <div class="task-cat-pills" id="task-cat-pills">
+              <button class="task-cat-pill active" data-cat="📖 Study"    onclick="pickTaskCat(this)">📖 Study</button>
+              <button class="task-cat-pill"        data-cat="🏋️ Exercise" onclick="pickTaskCat(this)">🏋️ Exercise</button>
+              <button class="task-cat-pill"        data-cat="🥗 Health"   onclick="pickTaskCat(this)">🥗 Health</button>
+              <button class="task-cat-pill"        data-cat="🌱 Personal" onclick="pickTaskCat(this)">🌱 Personal</button>
+              <button class="task-cat-pill"        data-cat="💼 Work"     onclick="pickTaskCat(this)">💼 Work</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addUserTask()" style="align-self:flex-start;">⚡ Add Activity</button>
+        </div>
+      </div>
+
+      <!-- Dynamic task list -->
+      <div id="tasks-list-container"></div>
+
+      <!-- All-done banner -->
+      <div id="all-tasks-done" class="all-tasks-done hidden">
+        <div class="atd-icon">🎉</div>
+        <h3>All Activities Completed!</h3>
+        <p>Amazing work! You've finished every task. Add more to keep the momentum going!</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACTIVITY SECTION -->
+  <div id="section-activity" class="section-content" style="display:none;">
+    <div style="max-width:900px;margin:0 auto;padding:2rem;">
+      <div class="section-title">📊 Activity Feed</div>
+      <div id="daily-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;"></div>
+      <div id="activity-list"></div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD SECTION -->
+  <div id="section-leaderboard" class="section-content" style="display:none;">
+    <div class="lb-container">
+      <div class="section-title">🏆 Leaderboard</div>
+      <div id="leaderboard-list"></div>
+    </div>
+  </div>
+
+  <!-- CALENDAR SECTION -->
+  <div id="section-calendar" class="section-content" style="display:none;">
+    <div style="max-width:900px;margin:0 auto;padding:2rem;">
+      <div class="section-title">📅 Learning Activity Calendar</div>
+      <p style="color:var(--muted);margin-bottom:1.5rem;">Your daily learning streaks</p>
+      <div class="glass" style="padding:1.5rem;overflow-x:auto;">
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSE DETAIL SECTION -->
+  <div id="section-course" class="section-content" style="display:none;">
+    <div class="course-detail">
+      <button class="back-btn" onclick="showSection('home')" style="margin-bottom:1.5rem;">← Back</button>
+      <div id="course-detail-content"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ SECTION -->
+  <div id="section-quiz" class="section-content" style="display:none;">
+    <div class="quiz-container">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+        <button class="back-btn" onclick="showSection('course')">← Back</button>
+        <div id="quiz-title" style="font-family:'Orbitron',monospace;font-size:1rem;color:var(--cyan);"></div>
+        <div class="timer-ring">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle class="track" cx="32" cy="32" r="28"/>
+            <circle class="progress-ring" id="timer-ring-path" cx="32" cy="32" r="28"/>
+          </svg>
+          <div class="timer-num" id="timer-num">30</div>
+        </div>
+      </div>
+      <div class="q-progress" id="q-progress"></div>
+      <div id="quiz-content"></div>
+    </div>
+  </div>
+
+  <!-- RESULT SECTION -->
+  <div id="section-result" class="section-content" style="display:none;">
+    <div class="result-box glass fade-up">
+      <button class="back-btn" onclick="showSection('home')" style="margin-bottom:1.5rem;">← Back to Home</button>
+      <div id="result-content"></div>
+    </div>
+  </div>
+
+  <!-- CERTIFICATE SECTION -->
+  <div id="section-certificate" class="section-content" style="display:none;">
+    <div class="cert-wrapper">
+      <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
+        <button class="back-btn" onclick="showSection('result')">← Back</button>
+        <button class="back-btn" onclick="showSection('home')" style="border-color:rgba(183,148,244,0.4);color:var(--purple);">🏠 Home</button>
+        <button class="btn btn-primary" onclick="downloadCertificate()" style="margin-left:auto;">⬇ Download PDF</button>
+      </div>
+      <div id="certificate"></div>
+    </div>
+  </div>
+
+</div><!-- /page-app -->
+
+<!-- App logic — loaded last so DOM is ready -->
+<script src="script.js"></script>
+</body>
+</html>
